@@ -20,11 +20,16 @@ def normalizar_texto(texto):
     return ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn')
 
 def analisar_mistura(produto_1, produto_2):
-    if produto_1 == produto_2:
-        return "SEGURO", "Você selecionou o mesmo produto duas vezes. Nenhuma reação."
-    
     p1 = normalizar_texto(produto_1)
     p2 = normalizar_texto(produto_2)
+    
+    # NOVA REGRA: Intercepta a opção "TODOS" antes de qualquer outra verificação
+    if p1 == "todos" or p2 == "todos":
+        return "ALTO", "☢️ PERIGO EXTREMO E EXPLOSIVO: Misturar todos esses produtos gera um coquetel letal! A Cândida e o Vinagre liberam Gás Cloro (tóxico); o Ox forma Ácido Peracético (corrosivo); e o Bicarbonato gera pressão por CO2. Risco gravíssimo de asfixia, queimaduras severas e explosão do recipiente. NUNCA FAÇA ISSO!"
+
+    if p1 == p2:
+        return "SEGURO", "Você selecionou o mesmo produto duas vezes. Nenhuma reação."
+    
     produtos_ordenados = sorted([p1, p2])
     chave_busca = produtos_ordenados[0] + produtos_ordenados[1]
     
@@ -41,18 +46,17 @@ st.title("🧪 Alerta de Misturas Químicas")
 st.markdown("Selecione dois produtos para verificar o risco da mistura. **Lembre-se: Química não é brincadeira!**")
 st.divider()
 
-# Função que reseta as escolhas para 'Selecione...'
 def resetar():
     st.session_state["p1"] = "Selecione..."
     st.session_state["p2"] = "Selecione..."
 
-# Inicializa o estado se for a primeira vez carregando
 if "p1" not in st.session_state:
     st.session_state["p1"] = "Selecione..."
 if "p2" not in st.session_state:
     st.session_state["p2"] = "Selecione..."
 
-opcoes_produtos = ["Selecione...", "Azulim", "Bicarbonato", "Cândida", "Ox", "Vinagre"]
+# Adicionada a opção "TODOS" no final da lista
+opcoes_produtos = ["Selecione...", "Azulim", "Bicarbonato", "Cândida", "Ox", "Vinagre", "TODOS"]
 
 col1, col2 = st.columns(2)
 with col1:
@@ -62,7 +66,6 @@ with col2:
 
 st.divider()
 
-# Botões lado a lado: Analisar e Limpar
 btn_col1, btn_col2 = st.columns([3, 1])
 
 with btn_col1:
